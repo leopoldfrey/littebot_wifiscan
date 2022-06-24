@@ -29,7 +29,7 @@ IPAddress broadcast(0, 0, 0, 0);
 int buttonState;
 int lastButtonState = LOW;
 unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 200;
+unsigned long debounceDelay = 400;
 
 void setup() {
   pinMode(BUTTON, INPUT);
@@ -114,7 +114,7 @@ void loop() {
   //Serial.print("BUTTON ");
   //Serial.println(buttonState);
 
-  if (buttonState != lastButtonState) {
+  if (reading != lastButtonState) {
     lastDebounceTime = millis();
   }
 
