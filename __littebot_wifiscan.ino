@@ -23,7 +23,7 @@ char* cur_pass = "none";
 WiFiUDP Udp;                           // A UDP instance to let us send and receive packets over UDP
 const unsigned int localPort = 8000;   // local port to listen for UDP packets at the NodeMCU (another device must send OSC messages to this port)
 const unsigned int outPort = 14000;    // remote port of the target device where the NodeMCU sends OSC to
-const IPAddress outIp(192, 168, 1, 66);
+//const IPAddress outIp(192, 168, 1, 66);
 IPAddress broadcast(0, 0, 0, 0);
 
 int buttonState;
@@ -209,9 +209,9 @@ void sendPhone() {
   Udp.beginPacket(broadcast, outPort);
   msg.send(Udp);
   Udp.endPacket();
-  Udp.beginPacket(outIp, outPort);
-  msg.send(Udp);
-  Udp.endPacket();
+//  Udp.beginPacket(outIp, outPort);
+//  msg.send(Udp);
+//  Udp.endPacket();
   msg.empty();
 
 }
