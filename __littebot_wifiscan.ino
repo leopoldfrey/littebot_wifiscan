@@ -13,8 +13,8 @@ const int RSSI_MIN = -100; // define minimum strength of signal in dBm
 
 //const int displayEnc = 1; // set to 1 to display Encryption or 0 not to display
 
-char* ssid[30] = {"artdesbruits2", "_BABEL", "g5scene-5G", "ssid4", "ssid5"};
-char* pass[30] = {"0A1B2C3D4E", "modality.of.visible", "pulsopulso", "pass4", "pass5"};
+char* ssid[30] = {"artdesbruits2", "_BABEL", "g5scene-5G", "NTGR_B9AC", "NTGR_B9AC_5G"};
+char* pass[30] = {"0A1B2C3D4E", "modality.of.visible", "pulsopulso", "S3cgV6A9", "S3cgV6A9"};
 
 bool connected = false;
 char* cur_ssid = "none";
@@ -23,13 +23,13 @@ char* cur_pass = "none";
 WiFiUDP Udp;                           // A UDP instance to let us send and receive packets over UDP
 const unsigned int localPort = 8000;   // local port to listen for UDP packets at the NodeMCU (another device must send OSC messages to this port)
 const unsigned int outPort = 14000;    // remote port of the target device where the NodeMCU sends OSC to
-//const IPAddress outIp(192, 168, 0, 19);
+const IPAddress outIp(192, 168, 1, 66);
 IPAddress broadcast(0, 0, 0, 0);
 
 int buttonState;
 int lastButtonState = LOW;
 unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 20;
+unsigned long debounceDelay = 200;
 
 void setup() {
   pinMode(BUTTON, INPUT);
@@ -109,22 +109,37 @@ void connect() {
 void loop() {
 
 
-  buttonState = digitalRead(BUTTON);
+  //buttonState = digitalRead(BUTTON);
+  int reading = digitalRead(BUTTON);
   //Serial.print("BUTTON ");
   //Serial.println(buttonState);
 
   if (buttonState != lastButtonState) {
-    if (buttonState == HIGH) {
-      Serial.println("PHONE UP");
-      sendPhone();
-    } else {
-      Serial.println("PHONE DOWN");
-      sendPhone();
-    }
-    digitalWrite(LED, buttonState);
+    lastDebounceTime = millis();
   }
 
-  lastButtonState = buttonState;
+  //lastButtonState = buttonState;
+
+
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    // if the button state has changed:
+    if (reading != buttonState) {
+      buttonState = reading;
+      if (buttonState == HIGH) {
+        Serial.println("PHONE UP");
+        sendPhone();
+      } else {
+        Serial.println("PHONE DOWN");
+        sendPhone();
+      }
+      digitalWrite(LED, buttonState);
+    }
+  }
+
+  lastButtonState = reading;
+
+
+
   delay(20);
 
   if (!connected) {
@@ -190,11 +205,15 @@ int scan() {
 
 void sendPhone() {
   OSCMessage msg("/phone");
-  msg.add(buttonState);
+  msg.add(!buttonState);
   Udp.beginPacket(broadcast, outPort);
   msg.send(Udp);
   Udp.endPacket();
+  Udp.beginPacket(outIp, outPort);
+  msg.send(Udp);
+  Udp.endPacket();
   msg.empty();
+
 }
 
 /*
